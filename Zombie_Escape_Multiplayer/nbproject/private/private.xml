@@ -3,7 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/com/zombieescape/servidor/ClientHandler.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/CargadorEscenarios.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/PruebaCargador.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/ValidadorEscenarios.java</file>
         </group>
     </open-files>
 </project-private>
