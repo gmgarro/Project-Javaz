@@ -13,6 +13,7 @@ public class Jugador {
     private EstadoJugador estado;
     private boolean llegoASalida;
     private int puntaje;
+    private long ultimoMovimiento;
 
     public Jugador(String id) {
         this.id = id;
@@ -61,4 +62,6 @@ public class Jugador {
     public boolean isLlegoASalida() { return llegoASalida; }
     public void setLlegoASalida(boolean llegoASalida) { this.llegoASalida = llegoASalida; }
     public int getPuntaje() { return puntaje; }
+    public long getUltimoMovimiento() { return ultimoMovimiento; }
+    public void setUltimoMovimiento(long ultimoMovimiento) { this.ultimoMovimiento = ultimoMovimiento; }
 }
