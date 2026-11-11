@@ -1,4 +1,4 @@
-package com.zombieescape.cliente;
+package zombie_escape_multiplayer.com.zombieescape.cliente;
 
 import javax.swing.*;
 import java.io.DataInputStream;
