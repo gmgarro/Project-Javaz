@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.CopyOnWriteArrayList;
-import zombie_escape_multiplayer.com.zombieescape.cliente.VentanaPrincipal;
 import zombie_escape_multiplayer.com.zombieescape.modelo.CargadorEscenarios; 
 
      
@@ -17,11 +16,7 @@ public class ClientHandler implements Runnable {
     private String idJugador = "Desconocido";
     private String rol = "CORREDOR"; // Por defecto empiezan como corredores
 
-    private VentanaPrincipal ventana;
     
-    public void serVentana(VentanaPrincipal ventana){
-        this.ventana = ventana;
-    }
     
     // Atributos específicos si este cliente es Francotirador (10 balas por escenario)
     private int municionFrancotirador = 10;
@@ -66,6 +61,9 @@ public class ClientHandler implements Runnable {
     // Actúa como la Autoridad Central del juego: valida reglas, turnos e intenciones
     private void procesarMensajeAutoritativo(String mensaje) {
         
+        if (SalaJuego.procesar(this, mensaje)) {
+            return;
+        }
         // Comando para iniciar la partida
         // Comando para iniciar la partida
         if (mensaje.startsWith("INICIAR")) {
@@ -217,7 +215,7 @@ public class ClientHandler implements Runnable {
         return true;
     }
 
-    public void enviarMensaje(String mensaje) {
+    public synchronized void enviarMensaje(String mensaje) {
         try {
             salida.writeUTF(mensaje);
             salida.flush();
@@ -234,6 +232,7 @@ public class ClientHandler implements Runnable {
     }
 
     private void removerCliente() {
+        SalaJuego.desconectar(this);
         clientes.remove(this);
         try {
             if (socket != null && !socket.isClosed()) {
@@ -243,24 +242,5 @@ public class ClientHandler implements Runnable {
             e.printStackTrace();
         }
         System.out.println("Cliente desconectado y removido. Quedan " + clientes.size() + " jugadores.");
-    }
-    
-    private void procesarMensajeEntrante(String mensaje) {
-        System.out.println("Mensaje recibido del servidor: " + mensaje);
-        
-        // Procesar mensajes del chat multijugador
-        if (mensaje.startsWith("CHAT:")) {
-            // Formato que emite el servidor: CHAT:Remitente:Texto
-            String[] partes = mensaje.split(":", 3);
-            if (partes.length >= 3) {
-                String emisor = partes[1];
-                String texto = partes[2];
-                
-                // Si la ventana principal y el lobby están activos, pintar el mensaje
-                if (ventana != null && ventana.getPanelLobby() != null && ventana.getPanelLobby().getPanelChat() != null) {
-                    ventana.getPanelLobby().getPanelChat().agregarMensaje(emisor, texto);
-                }
-            }
-        }
     }
 }

@@ -1,13 +1,13 @@
 
 package zombie_escape_multiplayer.com.zombieescape.modelo;
 
-public class Francotirador {
+public class Francotirador extends Jugador {
     private String idJugador;
     private int ammo;
     private int cuadranteAsignado; // Ej: 1 o 2 (para dividir la vista táctica)
 
     public Francotirador(String idJugador, int cuadranteAsignado) {
-        this.idJugador = idJugador;
+        super(idJugador);
         this.ammo = 10; // 10 balas por escenario según el requerimiento
         this.cuadranteAsignado = cuadranteAsignado;
     }
