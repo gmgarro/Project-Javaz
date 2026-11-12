@@ -17,6 +17,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import zombie_escape_multiplayer.com.zombieescape.modelo.Direccion;
+import zombie_escape_multiplayer.com.zombieescape.modelo.Vision;
 
 public class PanelJuego extends JPanel {
 
@@ -290,6 +292,7 @@ public class PanelJuego extends JPanel {
         int origenY = calcularDesplazamientoY();
 
         dibujarMapa(g2, tam, origenX, origenY);
+        dibujarCamposDeVision(g2, tam, origenX, origenY);
         dibujarZombis(g2, tam, origenX, origenY);
         dibujarJugadores(g2, tam, origenX, origenY);
     }
@@ -360,7 +363,21 @@ public class PanelJuego extends JPanel {
             }
         }
     }
-
+    
+    // Pinta de rojo las casillas que ven los zombis: ahí un jugador MORIRÍA
+    private void dibujarCamposDeVision(Graphics2D g2, int tam, int origenX, int origenY) {
+        g2.setColor(new Color(220, 40, 40, 110));
+        for (VistaZombi z : zombis) {
+            Direccion dir = Direccion.valueOf(z.dir);
+            for (int[] casilla : Vision.casillasVisibles(mapa, z.x, z.y, dir, nivel)) {
+                if (mapa[casilla[0]][casilla[1]] == 'S') {
+                    continue;      // la zona segura no se pinta: ahí no te ven
+                }
+                g2.fillRect(origenX + casilla[1] * tam, origenY + casilla[0] * tam, tam, tam);
+            }
+        }
+    }
+    
     private void dibujarZombis(Graphics2D g2, int tam, int origenX, int origenY) {
         for (VistaZombi z : zombis) {
             int px = origenX + z.y * tam;       // columna -> horizontal

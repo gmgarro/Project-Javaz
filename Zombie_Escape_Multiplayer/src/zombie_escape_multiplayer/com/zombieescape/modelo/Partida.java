@@ -162,13 +162,17 @@ public class Partida {
         if (!enCurso) {
             return;
         }
+
+        // 1. Primero se revisa quién está dentro de las casillas rojas que se VEN ahora
+        revisarMuertes();
+
+        // 2. Después cada zombi da su paso (y su campo de visión se mueve con él)
         for (Zombi z : zombis) {
             if (z.isVivo()) {
                 z.mover(mapa);
                 notificador.enviarATodos(mensajeZombi(z));
             }
         }
-        revisarMuertes();
         verificarFinNivel();
     }
 

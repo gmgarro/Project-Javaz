@@ -75,7 +75,7 @@ public class PruebaPartida {
         comprobar("El ranking viene de mayor a menor", true,
                 ranking.get(0).getPuntaje() >= ranking.get(1).getPuntaje());
 
-        // ---- Prueba 2: un jugador muere, el otro llega -> DERROTA ----
+        // ---- Prueba 2: un zombi ve a Carla (fuera de la zona segura) -> DERROTA ----
         Registro reg2 = new Registro();
         Partida p2 = new Partida(reg2);
         p2.agregarJugador("carla");
@@ -85,13 +85,23 @@ public class PruebaPartida {
             p2.getZombis().clear();
             Jugador carla = p2.getJugadores().get(0);
             char[][] mapa = p2.getMapa();
-            // pone un zombi pegado a Carla, mirándola
-            for (Direccion d : Direccion.values()) {
-                int zx = carla.getX() + d.getDx();
-                int zy = carla.getY() + d.getDy();
-                if (mapa[zx][zy] != CargadorEscenarios.PARED) {
-                    p2.getZombis().add(new Zombi(99, zx, zy, d.opuesta()));
-                    break;
+            // Buscamos una casilla de camino (.) con otra casilla de camino al lado
+            boolean puesta = false;
+            for (int x = 1; x < mapa.length - 1 && !puesta; x++) {
+                for (int y = 1; y < mapa[0].length - 1 && !puesta; y++) {
+                    if (mapa[x][y] != CargadorEscenarios.CAMINO) {
+                        continue;
+                    }
+                    for (Direccion d : Direccion.values()) {
+                        int zx = x + d.getDx();
+                        int zy = y + d.getDy();
+                        if (mapa[zx][zy] == CargadorEscenarios.CAMINO) {
+                            carla.colocarEn(x, y);
+                            p2.getZombis().add(new Zombi(99, zx, zy, d.opuesta()));   // pegado a Carla, mirándola
+                            puesta = true;
+                            break;
+                        }
+                    }
                 }
             }
             p2.moverZombis();
@@ -105,6 +115,32 @@ public class PruebaPartida {
         }
         comprobar("Mensaje FIN:DERROTA", true, reg2.hay("FIN:DERROTA"));
         comprobar("No se cargó el nivel 2", true, reg2.contar("MAPA:") == 1);
+
+        // ---- Prueba 2b: en la zona segura (S) nadie muere, aunque el zombi esté a su lado ----
+        Registro reg2b = new Registro();
+        Partida p2b = new Partida(reg2b);
+        p2b.agregarJugador("gina");
+        p2b.agregarJugador("hugo");
+        p2b.iniciar();
+        synchronized (p2b) {
+            p2b.getZombis().clear();
+            Jugador gina = p2b.getJugadores().get(0);       // empieza en la zona S
+            char[][] mapa = p2b.getMapa();
+            for (Direccion d : Direccion.values()) {
+                int zx = gina.getX() + d.getDx();
+                int zy = gina.getY() + d.getDy();
+                if (mapa[zx][zy] != CargadorEscenarios.PARED) {
+                    p2b.getZombis().add(new Zombi(98, zx, zy, d.opuesta()));
+                    break;
+                }
+            }
+            for (int i = 0; i < 4; i++) {
+                p2b.moverZombis();
+            }
+            comprobar("En la zona segura nadie muere (aunque el zombi esté al lado)", true,
+                    gina.getEstado() == EstadoJugador.VIVO);
+        }
+        p2b.terminar();
 
         // ---- Prueba 3: esconderse, cooldown y desconexión ----
         Registro reg3 = new Registro();

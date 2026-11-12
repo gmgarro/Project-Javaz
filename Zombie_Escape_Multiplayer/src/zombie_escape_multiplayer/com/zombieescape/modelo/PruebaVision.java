@@ -4,7 +4,6 @@
  */
 package zombie_escape_multiplayer.com.zombieescape.modelo;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,18 +18,34 @@ public class PruebaVision {
             "#...#...E..#",
             "############"));
 
-        // Zombi en (1,2) mirando a la DERECHA. Nivel 1 -> alcance 4 (llega hasta y=6)
+        // El alcance empieza chico y sube despacio
+        comprobar("Alcance nivel 1 = 2", true, Vision.alcance(1) == 2);
+        comprobar("Alcance nivel 4 = 4", true, Vision.alcance(4) == 4);
+        comprobar("Alcance nivel 10 = 7", true, Vision.alcance(10) == 7);
+
+        // Zombi en (1,2) mirando a la DERECHA. Nivel 1 -> alcance 2 (llega hasta y=4)
         Zombi zombi = new Zombi(1, 1, 2, Direccion.DERECHA);
 
-        comprobar("Jugador a 3 casillas, de frente", true,  ve(zombi, 1, 5, mapa));
-        comprobar("Jugador a 4 casillas (limite)",   true,  ve(zombi, 1, 6, mapa));
-        comprobar("Jugador a 5 casillas (lejos)",    false, ve(zombi, 1, 7, mapa));
-        comprobar("Jugador detras del zombi",        false, ve(zombi, 1, 1, mapa));
-        comprobar("Jugador en otra fila",            false, ve(zombi, 2, 3, mapa));
+        comprobar("Jugador a 1 casilla, de frente", true,  ve(zombi, 1, 3, mapa));
+        comprobar("Jugador a 2 casillas (limite)",  true,  ve(zombi, 1, 4, mapa));
+        comprobar("Jugador a 3 casillas (lejos)",   false, ve(zombi, 1, 5, mapa));
+        comprobar("Jugador detras del zombi",       false, ve(zombi, 1, 1, mapa));
+        comprobar("Jugador en otra fila",           false, ve(zombi, 2, 3, mapa));
+        comprobar("Nivel 10 (alcance 7) ve a 7 casillas", true,
+                Vision.zombiVe(zombi, nuevo(1, 9), mapa, 10));
 
         // Pared en medio: zombi en (2,1) mirando a la derecha, pared en (2,4)
         Zombi zombi2 = new Zombi(2, 2, 1, Direccion.DERECHA);
-        comprobar("Jugador detras de una pared",     false, ve(zombi2, 2, 6, mapa));
+        comprobar("Jugador a la vista antes de la pared", true,
+                Vision.zombiVe(zombi2, nuevo(2, 3), mapa, 1));
+        comprobar("Jugador detras de una pared (aunque alcance de sobra)", false,
+                Vision.zombiVe(zombi2, nuevo(2, 6), mapa, 10));
+
+        // Casillas visibles (lo que se pinta de rojo en pantalla)
+        ArrayList<int[]> casillas = Vision.casillasVisibles(mapa, 1, 2, Direccion.DERECHA, 1);
+        comprobar("Nivel 1: el zombi ve 2 casillas", true, casillas.size() == 2);
+        comprobar("La pared corta la vision (solo 2 casillas antes de la pared)", true,
+                Vision.casillasVisibles(mapa, 2, 1, Direccion.DERECHA, 10).size() == 2);
 
         // Esconderse
         Jugador j = new Jugador("ana");
@@ -56,8 +71,24 @@ public class PruebaVision {
         ArrayList<Jugador> muertos = Vision.revisarMuertes(zs, js, mapa, 1);
         comprobar("revisarMuertes mata al visible",  true,  muertos.size() == 1 && j.getEstado() == EstadoJugador.MUERTO);
 
-        // Nivel mayor, más alcance
-        comprobar("Nivel 3 (alcance 6) ve a 5 casillas", true, Vision.zombiVe(zombi, nuevo(1, 7), mapa, 3));
+        // Zona segura (S): nadie lo ve ahí, aunque esté de frente y cerca
+        char[][] mapaConS = CargadorEscenarios.construirMatriz(Arrays.asList(
+            "###########",
+            "#SSSS.....#",
+            "###########"));
+        Zombi zombi4 = new Zombi(4, 1, 5, Direccion.IZQUIERDA);   // mira hacia la zona S
+        Jugador enZonaS = nuevo(1, 4);                            // pegado al zombi, dentro de S
+        comprobar("En la zona segura S no lo ven (aunque este pegado)", false,
+                Vision.zombiVe(zombi4, enZonaS, mapaConS, 1));
+        ArrayList<Zombi> zs2 = new ArrayList<>();
+        zs2.add(zombi4);
+        ArrayList<Jugador> js2 = new ArrayList<>();
+        js2.add(enZonaS);
+        comprobar("En la zona segura S no muere", true,
+                Vision.revisarMuertes(zs2, js2, mapaConS, 1).size() == 0
+                && enZonaS.getEstado() == EstadoJugador.VIVO);
+        Zombi zombi5 = new Zombi(5, 1, 8, Direccion.IZQUIERDA);
+        comprobar("Un paso fuera de S si lo ven", true, Vision.zombiVe(zombi5, nuevo(1, 6), mapaConS, 1));
 
         System.out.println(fallos == 0 ? "TODO OK" : "FALLOS: " + fallos);
     }
