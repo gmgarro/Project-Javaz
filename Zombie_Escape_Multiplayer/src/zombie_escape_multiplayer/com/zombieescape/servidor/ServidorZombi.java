@@ -1,4 +1,4 @@
-package com.zombieescape.servidor;
+package zombie_escape_multiplayer.com.zombieescape.servidor;
 
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -14,6 +14,12 @@ public class ClienteZombi {
     private int puerto;
     private boolean conectado;
 
+    private VentanaPrincipal ventana;
+
+    public void setVentana(VentanaPrincipal ventana) {
+        this.ventana = ventana;
+    }
+    
     public ClienteZombi(String ipServidor, int puerto) {
         this.ipServidor = ipServidor;
         this.puerto = puerto;
@@ -80,7 +86,11 @@ public class ClienteZombi {
     }
 
     private void procesarMensajeEntrante(String mensaje) {
-        // Aquí se interpretarán los comandos MAPA, ESTADO, ZOMBI, TIEMPO, CHAT, FIN, etc.
         System.out.println("Mensaje recibido del servidor: " + mensaje);
+        
+        // Entregar la trama directamente al cerebro visual de VentanaPrincipal
+        if (ventana != null) {
+            ventana.procesarMensaje(mensaje);
+        }
     }
 }

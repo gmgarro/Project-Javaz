@@ -148,6 +148,13 @@ public class PanelJuego extends JPanel {
 
     public void procesarMensaje(String mensaje) {
         try {
+            // Capturar la orden directa del servidor para arrancar
+            if (mensaje.equals("PARTIDA_INICIADA")) {
+                esEspectador = false;
+                repaint();
+                return;
+            }
+
             String[] p = mensaje.split(":");
 
             if (p[0].equals("MAPA")) {
@@ -200,7 +207,6 @@ public class PanelJuego extends JPanel {
         }
         repaint();
     }
-
     private VistaJugador obtenerJugador(String id) {
         for (VistaJugador j : jugadores) {
             if (j.id.equals(id)) {

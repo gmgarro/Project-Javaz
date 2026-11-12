@@ -36,7 +36,7 @@ public class VentanaPrincipal extends JFrame {
         this.cliente = cliente;
         this.nombre = nombre;
 
-        panelLobby = new PanelLobby(cliente, nombre);
+        panelLobby = new PanelLobby(cliente, nombre, rol);
         panelJuego = new PanelJuego(cliente, nombre, rol);
         chatDelJuego = new PanelChat(cliente);
         panelRanking = new PanelRanking();
@@ -103,5 +103,9 @@ public class VentanaPrincipal extends JFrame {
             cartas.show(contenedor, PANTALLA_JUEGO);
             SwingUtilities.invokeLater(() -> panelJuego.enfocar());
         }
+    }
+    
+    public PanelLobby getPanelLobby() {
+        return panelLobby;
     }
 }

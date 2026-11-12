@@ -1,4 +1,4 @@
-package com.zombieescape.servidor;
+package zombie_escape_multiplayer.com.zombieescape.servidor;
 
 import java.util.HashMap;
 import java.util.Map;

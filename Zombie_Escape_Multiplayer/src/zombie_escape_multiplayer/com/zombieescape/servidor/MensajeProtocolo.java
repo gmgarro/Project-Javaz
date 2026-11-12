@@ -1,4 +1,4 @@
-package com.zombieescape.modelo;
+package zombie_escape_multiplayer.com.zombieescape.servidor;
 
 public class MensajeProtocolo {
     // Comandos de cliente a servidor / general
