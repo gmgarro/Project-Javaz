@@ -3,13 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/VentanaPrincipal.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/PanelJuego.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/MainCliente.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/PanelLobby.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/servidor/ClientHandler.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/CargadorEscenarios.java</file>
-            <file>file:/C:/Users/gmgar/Desktop/TEC/IIS-2026/POO/Progra_II/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/ClienteZombi.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/Vision.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/Zombie_Escape_Multiplayer.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/MainCliente.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/servidor/SalaJuego.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/servidor/ClientHandler.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/Francotirador.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/Zombi.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/Partida.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/PruebaPartida.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/modelo/PruebaVision.java</file>
+            <file>file:/C:/Users/esteb/OneDrive/Desktop/IIS_2026/POO/Proyecto2_EstebanSolano_GabrielMontero/Project-Javaz/Zombie_Escape_Multiplayer/src/zombie_escape_multiplayer/com/zombieescape/cliente/PanelJuego.java</file>
         </group>
     </open-files>
 </project-private>

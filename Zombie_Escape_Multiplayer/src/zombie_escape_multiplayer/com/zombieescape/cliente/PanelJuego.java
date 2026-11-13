@@ -4,19 +4,24 @@
  */
 package zombie_escape_multiplayer.com.zombieescape.cliente;
 
-
-import javax.swing.JPanel;
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 import zombie_escape_multiplayer.com.zombieescape.modelo.Direccion;
 import zombie_escape_multiplayer.com.zombieescape.modelo.Vision;
 
@@ -47,13 +52,26 @@ public class PanelJuego extends JPanel {
     }
 
     private static final int ALTO_HUD = 44;
+    private static final String CARPETA_IMAGENES = "/zombie_escape_multiplayer/com/zombieescape/imagenes/";
 
+    // Colores de respaldo (se usan solo si falta alguna imagen)
     private static final Color[] COLORES = {
         new Color(66, 133, 244), new Color(244, 180, 0), new Color(219, 68, 155),
         new Color(255, 112, 67), new Color(0, 172, 193), new Color(171, 71, 188),
         new Color(124, 179, 66), new Color(255, 202, 40), new Color(141, 110, 99),
         new Color(236, 239, 241)
     };
+
+    // Imágenes (si un archivo no existe, queda en null y se dibuja con colores)
+    private BufferedImage[] imgPisos = new BufferedImage[3];
+    private BufferedImage[] imgParedes = new BufferedImage[3];
+    private BufferedImage[] imgJugadores = new BufferedImage[10];
+    private BufferedImage imgEscondite;
+    private BufferedImage imgEntrada;
+    private BufferedImage imgSalida;
+    private BufferedImage imgZombi;
+    private BufferedImage imgLapida;
+    private BufferedImage imgMira;
 
     private ClienteZombi cliente;
     private String miId;
@@ -63,14 +81,22 @@ public class PanelJuego extends JPanel {
     private int nivel;
     private int segundos;
     private int balas = 10;
-    private boolean esEspectador;
+    private boolean esEspectador;       // te mataron
+    private boolean yaEscapaste;        // llegaste a la salida y esperas a los demás
     private ArrayList<VistaJugador> jugadores = new ArrayList<>();
     private ArrayList<VistaZombi> zombis = new ArrayList<>();
+
+    // Zona que ve el francotirador (la manda el servidor con VISTA)
+    private boolean tieneVista;
+    private int vistaFilaIni, vistaFilaFin, vistaColIni, vistaColFin;
 
     public PanelJuego(ClienteZombi cliente, String miId, String miRol) {
         this.cliente = cliente;
         this.miId = miId;
         this.miRol = miRol;
+
+        cargarImagenes();
+        actualizarCursor();
 
         setBackground(new Color(20, 20, 24));
         setFocusable(true);
@@ -91,10 +117,51 @@ public class PanelJuego extends JPanel {
         });
     }
 
-    //  Entrada del jugador 
+    // ---------- Imágenes ----------
+
+    private void cargarImagenes() {
+        for (int i = 0; i < 3; i++) {
+            imgPisos[i] = cargarImagen("piso_" + i + ".png");
+            imgParedes[i] = cargarImagen("pared_" + i + ".png");
+        }
+        for (int i = 0; i < imgJugadores.length; i++) {
+            imgJugadores[i] = cargarImagen("jugador_" + i + ".png");
+        }
+        imgEscondite = cargarImagen("escondite.png");
+        imgEntrada = cargarImagen("entrada.png");
+        imgSalida = cargarImagen("salida.png");
+        imgZombi = cargarImagen("zombi.png");
+        imgLapida = cargarImagen("lapida.png");
+        imgMira = cargarImagen("mira.png");
+    }
+
+    // Lee una imagen de la carpeta de recursos. Si no existe, devuelve null (no se rompe nada).
+    private BufferedImage cargarImagen(String nombre) {
+        try {
+            return ImageIO.read(PanelJuego.class.getResource(CARPETA_IMAGENES + nombre));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // El francotirador usa una mira como cursor del mouse
+    private void actualizarCursor() {
+        try {
+            if ("FRANCOTIRADOR".equals(miRol) && imgMira != null) {
+                setCursor(Toolkit.getDefaultToolkit().createCustomCursor(
+                        imgMira, new Point(16, 16), "mira"));
+            } else {
+                setCursor(Cursor.getDefaultCursor());
+            }
+        } catch (Exception e) {
+            setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    // ---------- Entrada del jugador ----------
 
     private void teclaPresionada(int codigo) {
-        if (!"CORREDOR".equals(miRol) || esEspectador || mapa == null) {
+        if (!"CORREDOR".equals(miRol) || esEspectador || yaEscapaste || mapa == null) {
             return;
         }
 
@@ -129,7 +196,7 @@ public class PanelJuego extends JPanel {
 
         int columna = dentroX / tam;
         int fila = dentroY / tam;
-        if (fila < mapa.length && columna < mapa[0].length) {
+        if (fila < mapa.length && columna < mapa[0].length && esVisible(fila, columna)) {
             // x = fila, y = columna
             cliente.enviarMensaje("DISPARO:" + fila + ":" + columna);
             balas--;
@@ -143,10 +210,11 @@ public class PanelJuego extends JPanel {
 
     public void setRol(String rol) {
         this.miRol = rol;
+        actualizarCursor();
         repaint();
     }
 
-    //  Mensajes que llegan del servidor 
+    // ---------- Mensajes que llegan del servidor ----------
 
     public void procesarMensaje(String mensaje) {
         try {
@@ -173,6 +241,8 @@ public class PanelJuego extends JPanel {
                 mapa = nuevo;
                 zombis.clear();
                 esEspectador = false;
+                yaEscapaste = false;
+                tieneVista = false;
                 balas = 10;
 
             } else if (p[0].equals("ESTADO")) {
@@ -182,6 +252,7 @@ public class PanelJuego extends JPanel {
                 j.estado = p[4];
                 if (p[1].equals(miId)) {
                     esEspectador = p[4].equals("MUERTO");
+                    yaEscapaste = p[4].equals("SALIO");
                 }
 
             } else if (p[0].equals("ZOMBI")) {
@@ -203,12 +274,24 @@ public class PanelJuego extends JPanel {
 
             } else if (p[0].equals("DESCONEXION")) {
                 quitarJugador(p[1]);
+
+            } else if (p[0].equals("VISTA") && p[1].equals(miId)) {
+                // VISTA:nombre:filaIni:filaFin:colIni:colFin  (solo para el francotirador)
+                vistaFilaIni = Integer.parseInt(p[2]);
+                vistaFilaFin = Integer.parseInt(p[3]);
+                vistaColIni = Integer.parseInt(p[4]);
+                vistaColFin = Integer.parseInt(p[5]);
+                tieneVista = true;
+
+            } else if (p[0].equals("AMMO") && p[1].equals(miId)) {
+                balas = Integer.parseInt(p[2]);
             }
         } catch (RuntimeException e) {
             System.out.println("Mensaje ignorado (" + mensaje + "): " + e.getMessage());
         }
         repaint();
     }
+
     private VistaJugador obtenerJugador(String id) {
         for (VistaJugador j : jugadores) {
             if (j.id.equals(id)) {
@@ -253,7 +336,7 @@ public class PanelJuego extends JPanel {
         return jugadores;
     }
 
-    //  Dibujo 
+    // ---------- Dibujo ----------
 
     private int calcularTam() {
         if (mapa == null) {
@@ -272,11 +355,23 @@ public class PanelJuego extends JPanel {
         return ALTO_HUD + (getHeight() - ALTO_HUD - calcularTam() * mapa.length) / 2;
     }
 
+    // ¿Esta casilla se ve? Siempre, salvo que seas francotirador y esté fuera de tu zona.
+    private boolean esVisible(int fila, int columna) {
+        if (!"FRANCOTIRADOR".equals(miRol) || !tieneVista) {
+            return true;
+        }
+        return fila >= vistaFilaIni && fila <= vistaFilaFin
+                && columna >= vistaColIni && columna <= vistaColFin;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // Para que las imágenes de pixel-art se vean nítidas al escalarlas
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
         dibujarHud(g2);
 
@@ -295,6 +390,7 @@ public class PanelJuego extends JPanel {
         dibujarCamposDeVision(g2, tam, origenX, origenY);
         dibujarZombis(g2, tam, origenX, origenY);
         dibujarJugadores(g2, tam, origenX, origenY);
+        dibujarMarcoDeVista(g2, tam, origenX, origenY);
     }
 
     private void dibujarHud(Graphics2D g2) {
@@ -324,6 +420,9 @@ public class PanelJuego extends JPanel {
         if (esEspectador) {
             quien = miId + " - ESPECTADOR";
             g2.setColor(new Color(255, 120, 120));
+        } else if (yaEscapaste) {
+            quien = "¡ESCAPASTE! Mirando a los demás";
+            g2.setColor(new Color(120, 230, 140));
         } else {
             g2.setColor(Color.WHITE);
         }
@@ -334,62 +433,87 @@ public class PanelJuego extends JPanel {
     private void dibujarMapa(Graphics2D g2, int tam, int origenX, int origenY) {
         for (int fila = 0; fila < mapa.length; fila++) {
             for (int col = 0; col < mapa[fila].length; col++) {
-                char c = mapa[fila][col];
-                if (c == '#') {
-                    g2.setColor(new Color(58, 60, 70));
-                } else if (c == 'E') {
-                    g2.setColor(new Color(46, 125, 80));
-                } else if (c == 'S') {
-                    g2.setColor(new Color(60, 90, 150));
-                } else if (c == 'X') {
-                    g2.setColor(new Color(212, 175, 55));
-                } else {
-                    g2.setColor(new Color(150, 150, 140));
-                }
-                g2.fillRect(origenX + col * tam, origenY + fila * tam, tam, tam);
+                int px = origenX + col * tam;
+                int py = origenY + fila * tam;
 
-                if (c != '#') {
-                    g2.setColor(new Color(0, 0, 0, 40));
-                    g2.drawRect(origenX + col * tam, origenY + fila * tam, tam, tam);
+                if (!esVisible(fila, col)) {
+                    g2.setColor(new Color(12, 12, 15));      // fuera de la vista del francotirador
+                    g2.fillRect(px, py, tam, tam);
+                    continue;
                 }
-                if (c == 'X' || c == 'E') {
-                    g2.setColor(Color.WHITE);
-                    g2.setFont(new Font("SansSerif", Font.BOLD, Math.max(tam * 2 / 3, 8)));
-                    FontMetrics fm = g2.getFontMetrics();
-                    String letra = String.valueOf(c);
-                    g2.drawString(letra, origenX + col * tam + (tam - fm.stringWidth(letra)) / 2,
-                            origenY + fila * tam + (tam + fm.getAscent()) / 2 - 2);
+
+                char c = mapa[fila][col];
+                // Reparte las variantes: la mayoría lisas, y de vez en cuando una con detalle
+                int tipo = (fila * 7 + col * 13) % 6;
+                int variante = tipo < 4 ? 0 : tipo - 3;
+                BufferedImage imagen;
+                if (c == '#') {
+                    imagen = imgParedes[variante];
+                } else if (c == 'E') {
+                    imagen = imgEscondite;
+                } else if (c == 'S') {
+                    imagen = imgEntrada;
+                } else if (c == 'X') {
+                    imagen = imgSalida;
+                } else {
+                    imagen = imgPisos[variante];
+                }
+
+                if (imagen != null) {
+                    g2.drawImage(imagen, px, py, tam, tam, null);
+                } else {
+                    dibujarCasillaDeColor(g2, c, px, py, tam);
                 }
             }
         }
     }
-    
+
+    // Respaldo: si falta una imagen, la casilla se pinta de color
+    private void dibujarCasillaDeColor(Graphics2D g2, char c, int px, int py, int tam) {
+        if (c == '#') {
+            g2.setColor(new Color(58, 60, 70));
+        } else if (c == 'E') {
+            g2.setColor(new Color(46, 125, 80));
+        } else if (c == 'S') {
+            g2.setColor(new Color(60, 90, 150));
+        } else if (c == 'X') {
+            g2.setColor(new Color(212, 175, 55));
+        } else {
+            g2.setColor(new Color(150, 150, 140));
+        }
+        g2.fillRect(px, py, tam, tam);
+    }
+
     // Pinta de rojo las casillas que ven los zombis: ahí un jugador MORIRÍA
     private void dibujarCamposDeVision(Graphics2D g2, int tam, int origenX, int origenY) {
         g2.setColor(new Color(220, 40, 40, 110));
         for (VistaZombi z : zombis) {
             Direccion dir = Direccion.valueOf(z.dir);
             for (int[] casilla : Vision.casillasVisibles(mapa, z.x, z.y, dir, nivel)) {
-                if (mapa[casilla[0]][casilla[1]] == 'S') {
+                if (mapa[casilla[0]][casilla[1]] == 'S' || !esVisible(casilla[0], casilla[1])) {
                     continue;      // la zona segura no se pinta: ahí no te ven
                 }
                 g2.fillRect(origenX + casilla[1] * tam, origenY + casilla[0] * tam, tam, tam);
             }
         }
     }
-    
+
     private void dibujarZombis(Graphics2D g2, int tam, int origenX, int origenY) {
         for (VistaZombi z : zombis) {
+            if (!esVisible(z.x, z.y)) {
+                continue;
+            }
             int px = origenX + z.y * tam;       // columna -> horizontal
             int py = origenY + z.x * tam;       // fila -> vertical
-            g2.setColor(new Color(76, 160, 60));
-            g2.fillRoundRect(px + 2, py + 2, tam - 4, tam - 4, 6, 6);
-            g2.setColor(new Color(200, 30, 30));
 
-            // Un punto rojo indica hacia dónde mira
-            int centroX = px + tam / 2;
-            int centroY = py + tam / 2;
-            int largo = tam / 2;
+            if (imgZombi != null) {
+                g2.drawImage(imgZombi, px, py, tam, tam, null);
+            } else {
+                g2.setColor(new Color(76, 160, 60));
+                g2.fillRoundRect(px + 2, py + 2, tam - 4, tam - 4, 6, 6);
+            }
+
+            // Un punto rojo en el borde indica hacia dónde mira
             int dx = 0;
             int dy = 0;
             if (z.dir.equals("ARRIBA")) {
@@ -401,35 +525,48 @@ public class PanelJuego extends JPanel {
             } else {
                 dx = 1;
             }
-            g2.fillOval(centroX + dx * largo / 2 - 3, centroY + dy * largo / 2 - 3, 7, 7);
+            int marca = Math.max(tam / 6, 4);
+            g2.setColor(new Color(255, 60, 60));
+            g2.fillOval(px + tam / 2 + dx * (tam / 2 - marca / 2) - marca / 2,
+                        py + tam / 2 + dy * (tam / 2 - marca / 2) - marca / 2, marca, marca);
         }
     }
 
     private void dibujarJugadores(Graphics2D g2, int tam, int origenX, int origenY) {
         for (int i = 0; i < jugadores.size(); i++) {
             VistaJugador j = jugadores.get(i);
+            if (!esVisible(j.x, j.y)) {
+                continue;
+            }
             int px = origenX + j.y * tam;
             int py = origenY + j.x * tam;
+            BufferedImage sprite = imgJugadores[i % imgJugadores.length];
             Color color = COLORES[i % COLORES.length];
 
             if (j.estado.equals("MUERTO")) {
-                g2.setColor(new Color(110, 110, 110));
-                g2.fillOval(px + 3, py + 3, tam - 6, tam - 6);
-                g2.setColor(new Color(200, 40, 40));
-                g2.drawLine(px + 4, py + 4, px + tam - 4, py + tam - 4);
-                g2.drawLine(px + tam - 4, py + 4, px + 4, py + tam - 4);
-            } else if (j.estado.equals("ESCONDIDO")) {
-                g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 110));
-                g2.fillOval(px + 5, py + 5, tam - 10, tam - 10);
-            } else if (j.estado.equals("SALIO")) {
-                g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 160));
-                g2.fillOval(px + 4, py + 4, tam - 8, tam - 8);
+                if (imgLapida != null) {
+                    g2.drawImage(imgLapida, px, py, tam, tam, null);
+                } else {
+                    g2.setColor(new Color(110, 110, 110));
+                    g2.fillOval(px + 3, py + 3, tam - 6, tam - 6);
+                }
             } else {
-                g2.setColor(color);
-                g2.fillOval(px + 3, py + 3, tam - 6, tam - 6);
+                // Escondido o ya en la salida: se dibuja semitransparente
+                if (j.estado.equals("ESCONDIDO")) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.40f));
+                } else if (j.estado.equals("SALIO")) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.60f));
+                }
+                if (sprite != null) {
+                    g2.drawImage(sprite, px, py, tam, tam, null);
+                } else {
+                    g2.setColor(color);
+                    g2.fillOval(px + 3, py + 3, tam - 6, tam - 6);
+                }
+                g2.setComposite(AlphaComposite.SrcOver);
             }
 
-            if (j.id.equals(miId)) {
+            if (j.id.equals(miId) && !j.estado.equals("MUERTO")) {
                 g2.setColor(Color.WHITE);
                 g2.drawOval(px + 1, py + 1, tam - 3, tam - 3);
             }
@@ -443,5 +580,15 @@ public class PanelJuego extends JPanel {
             g2.setColor(j.id.equals(miId) ? new Color(255, 235, 59) : Color.WHITE);
             g2.drawString(nombre, px + (tam - fm.stringWidth(nombre)) / 2, py - 2);
         }
+    }
+
+    // Marco amarillo alrededor de la zona que ve el francotirador
+    private void dibujarMarcoDeVista(Graphics2D g2, int tam, int origenX, int origenY) {
+        if (!"FRANCOTIRADOR".equals(miRol) || !tieneVista) {
+            return;
+        }
+        g2.setColor(new Color(255, 214, 0));
+        g2.drawRect(origenX + vistaColIni * tam, origenY + vistaFilaIni * tam,
+                (vistaColFin - vistaColIni + 1) * tam, (vistaFilaFin - vistaFilaIni + 1) * tam);
     }
 }

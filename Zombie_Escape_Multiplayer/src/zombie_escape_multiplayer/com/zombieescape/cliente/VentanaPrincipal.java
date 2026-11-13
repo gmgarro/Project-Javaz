@@ -87,7 +87,8 @@ public class VentanaPrincipal extends JFrame {
             enJuego = false;
         } else if (mensaje.startsWith("ESTADO:") || mensaje.startsWith("ZOMBI:")
                 || mensaje.startsWith("TIEMPO:") || mensaje.startsWith("PUNTAJE:")
-                || mensaje.startsWith("DESCONEXION:")) {
+                || mensaje.startsWith("DESCONEXION:")
+                || mensaje.startsWith("VISTA:") || mensaje.startsWith("AMMO:")) {
             panelJuego.procesarMensaje(mensaje);
         }
     }

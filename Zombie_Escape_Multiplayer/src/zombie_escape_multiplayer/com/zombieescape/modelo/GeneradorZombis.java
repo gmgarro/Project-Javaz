@@ -62,8 +62,9 @@ public class GeneradorZombis {
         for (Direccion d : Direccion.values()) {
             int nx = x + d.getDx();
             int ny = y + d.getDy();
-            if (nx >= 0 && nx < mapa.length && ny >= 0 && ny < mapa[0].length
-                    && mapa[nx][ny] != CargadorEscenarios.PARED) {
+                if (nx >= 0 && nx < mapa.length && ny >= 0 && ny < mapa[0].length
+                    && mapa[nx][ny] != CargadorEscenarios.PARED
+                    && mapa[nx][ny] != CargadorEscenarios.ENTRADA) {
                 libres[cantidad] = d;
                 cantidad++;
             }

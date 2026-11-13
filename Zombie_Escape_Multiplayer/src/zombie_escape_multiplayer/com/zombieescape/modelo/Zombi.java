@@ -69,7 +69,10 @@ public class Zombi {
         if (py < 0 || py >= mapa[0].length) {
             return false;
         }
-        return mapa[px][py] != CargadorEscenarios.PARED;
+        // La zona segura (S) cuenta como pared para los zombis: no entran ahí
+        return mapa[px][py] != CargadorEscenarios.PARED
+            && mapa[px][py] != CargadorEscenarios.ENTRADA
+            && mapa[px][py] != CargadorEscenarios.SALIDA;
     }
 
     public void matar() { vivo = false; }
