@@ -9,9 +9,10 @@ import java.util.ArrayList;
 
 public class GestorPuntuacion {
 
-    // Puntaje por llegar a la salida: más rápido = más puntos (mínimo 100)
-    public static int calcularPuntaje(int tiempoEscape) {
-        return Math.max(1000 - tiempoEscape * 10, 100);
+    // Puntaje por el puesto en que escapa: 0 = primero (1000), 1 = segundo (900)...
+    // cada puesto da un puntaje distinto y el mínimo es 100
+    public static int calcularPuntaje(int puesto) {
+        return Math.max(1000 - puesto * 100, 100);
     }
 
     // Devuelve una copia de la lista ordenada de mayor a menor puntaje

@@ -229,6 +229,9 @@ public class PanelJuego extends JPanel {
 
             if (p[0].equals("MAPA")) {
                 nivel = Integer.parseInt(p[1]);
+                if (nivel == 1) {
+                    jugadores.clear();   // partida nueva: se borran jugadores y puntajes de la anterior
+                }
                 int filas = Integer.parseInt(p[2]);
                 int columnas = Integer.parseInt(p[3]);
                 String[] filasTexto = p[4].split(";");

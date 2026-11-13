@@ -40,6 +40,7 @@ public class VentanaPrincipal extends JFrame {
         panelJuego = new PanelJuego(cliente, nombre, rol);
         chatDelJuego = new PanelChat(cliente);
         panelRanking = new PanelRanking();
+        panelRanking.setAlSalir(() -> volverAlMain());
 
         // Pantalla de juego: el mapa al centro y el chat a la derecha
         JPanel pantallaJuego = new JPanel(new BorderLayout());
@@ -75,6 +76,7 @@ public class VentanaPrincipal extends JFrame {
             String[] partes = mensaje.split(":");
             if (partes.length >= 3 && partes[1].equals(nombre)) {
                 panelJuego.setRol(partes[2]);
+                panelLobby.setRol(partes[2]);
             }
         } else if (mensaje.equals("PARTIDA_INICIADA")) {
             mostrarJuego();
@@ -106,6 +108,13 @@ public class VentanaPrincipal extends JFrame {
         }
     }
     
+    // cierra esta ventana y su conexión y vuelve a la pantalla donde se pide el nombre
+    private void volverAlMain() {
+        cliente.desconectar();
+        MainCliente.main(new String[0]);
+        dispose();
+    }
+
     public PanelLobby getPanelLobby() {
         return panelLobby;
     }

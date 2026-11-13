@@ -23,8 +23,10 @@ public class Partida {
     private int segundos;
     private boolean enCurso;
     private boolean huboMuerte;
+    private int escapadosEnNivel;
     private Timer timerZombis;
     private Timer timerReloj;
+    
 
     public Partida(Notificador notificador) {
         this.notificador = notificador;
@@ -46,6 +48,7 @@ public class Partida {
         }
         totalNiveles = CargadorEscenarios.contarEscenarios();
         nivel = 1;
+        segundos = 0;   // el reloj arranca aquí y ya no se reinicia por nivel
         enCurso = true;
         cargarNivel();
         if (enCurso) {
@@ -63,7 +66,7 @@ public class Partida {
             return;
         }
 
-        segundos = 0;
+        escapadosEnNivel = 0;
         huboMuerte = false;
 
         // Casillas de entrada (S)
@@ -118,7 +121,9 @@ public class Partida {
 
         if (mapa[nuevoX][nuevoY] == CargadorEscenarios.SALIDA) {
             j.setLlegoASalida(true);
-            j.sumarPuntos(GestorPuntuacion.calcularPuntaje(segundos));
+            // el puesto es 0 para el primero que escapa, 1 para el segundo, etc.
+            j.sumarPuntos(GestorPuntuacion.calcularPuntaje(escapadosEnNivel));
+            escapadosEnNivel++;
             notificador.enviarATodos("PUNTAJE:" + j.getId() + ":" + j.getPuntaje());
         }
         notificador.enviarATodos(mensajeEstado(j));

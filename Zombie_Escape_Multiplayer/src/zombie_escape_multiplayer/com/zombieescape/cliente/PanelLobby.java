@@ -139,6 +139,12 @@ public class PanelLobby extends JPanel {
         return panelChat;
     }
 
+    // deja en el combo el rol que confirmó el servidor (solo si es distinto, para no mandar UNIRSE en bucle)
+    public void setRol(String rol) {
+        if (!rol.equals(comboRol.getSelectedItem())) {
+            comboRol.setSelectedItem(rol);
+        }
+    }
     private static void estilizarCombo(JComboBox<String> combo) {
         combo.setFont(new Font("SansSerif", Font.BOLD, 13));
         combo.setForeground(CAMPO);

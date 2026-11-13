@@ -166,22 +166,34 @@ public class SalaJuego {
             origen.enviarMensaje("ERROR: La partida ya está en curso.");
             return;
         }
-        if (participantes.size() < 2) {
-            origen.enviarMensaje("ERROR: Se necesitan al menos 2 jugadores para iniciar la partida.");
-            return;
-        }
+        // cuenta los roles antes de dejar empezar
         int corredores = 0;
+        int francotiradores = 0;
         for (Participante p : participantes) {
             if (p.rol.equals("CORREDOR")) {
                 corredores++;
+            } else {
+                francotiradores++;
             }
         }
         if (corredores < 1) {
             origen.enviarMensaje("ERROR: Hace falta al menos 1 corredor para iniciar la partida.");
             return;
         }
+        if (francotiradores < 1) {
+            origen.enviarMensaje("ERROR: Hace falta al menos 1 francotirador para iniciar la partida.");
+            return;
+        }
+        if (francotiradores > MAX_FRANCOTIRADORES) {
+            origen.enviarMensaje("ERROR: Solo se permiten " + MAX_FRANCOTIRADORES + " francotiradores como máximo.");
+            return;
+        }
 
-        // Todo en orden: se crea la partida y se reparten los roles
+        if (corredores < 1) {
+            origen.enviarMensaje("ERROR: Hace falta al menos 1 corredor para iniciar la partida.");
+            return;
+        }
+
         partida = new Partida(mensaje -> enviarDesdePartida(mensaje));
         int numeroTirador = 0;
         for (Participante p : participantes) {
