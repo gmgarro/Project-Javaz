@@ -42,7 +42,6 @@ public class MainCliente {
                     JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            ventana.setVisible(true);
             System.out.println("Cliente conectado exitosamente como: " + nombre + " [" + rol + "]");
         });
     }

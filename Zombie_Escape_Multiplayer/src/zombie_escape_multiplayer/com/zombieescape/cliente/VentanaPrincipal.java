@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.JOptionPane;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -30,6 +31,7 @@ public class VentanaPrincipal extends JFrame {
     private PanelChat chatDelJuego;
     private PanelRanking panelRanking;
     private boolean enJuego;
+    private boolean aceptado;
 
     public VentanaPrincipal(ClienteZombi cliente, String nombre, String rol) {
         super("Zombi Escape Multijugador - " + nombre);
@@ -70,13 +72,24 @@ public class VentanaPrincipal extends JFrame {
             if (partes.length == 3) {
                 agregarAlChat(partes[1], partes[2]);
             }
-        } else if (mensaje.startsWith("ERROR")) {
-            agregarAlChat("Sistema", mensaje);
-        } else if (mensaje.startsWith("ROL:")) {
+        }else if (mensaje.startsWith("ERROR")) {
+            if (!aceptado && esErrorDeIngreso(mensaje)) {
+                JOptionPane.showMessageDialog(null, mensaje.substring(6).trim(),
+                        "No se pudo ingresar", JOptionPane.WARNING_MESSAGE);
+                volverAlMain();
+                return;
+            }
+            agregarAlChat("Sistema", mensaje); 
+        
+        }else if (mensaje.startsWith("ROL:")) {
             String[] partes = mensaje.split(":");
             if (partes.length >= 3 && partes[1].equals(nombre)) {
                 panelJuego.setRol(partes[2]);
                 panelLobby.setRol(partes[2]);
+                if (!aceptado) {
+                    aceptado = true;
+                    setVisible(true);
+                }
             }
         } else if (mensaje.equals("PARTIDA_INICIADA")) {
             mostrarJuego();
@@ -108,6 +121,13 @@ public class VentanaPrincipal extends JFrame {
         }
     }
     
+    // errores del servidor que significan que no te dejó entrar a la sala
+    private boolean esErrorDeIngreso(String mensaje) {
+        return mensaje.contains("Ya hay un jugador llamado")
+                || mensaje.contains("La partida ya empezó")
+                || mensaje.contains("Nombre de jugador no válido");
+    }
+
     // cierra esta ventana y su conexión y vuelve a la pantalla donde se pide el nombre
     private void volverAlMain() {
         cliente.desconectar();
